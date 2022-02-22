@@ -64,20 +64,20 @@ func (q *Queries) GetAccount(ctx context.Context, id int64) (Account, error) {
 	return i, err
 }
 
-const listAcount = `-- name: ListAcount :many
+const listAccount = `-- name: ListAccount :many
 SELECT id, owner, balance, currency, created_at FROM accounts
 ORDER BY id
 LIMIT $1
 OFFSET $2
 `
 
-type ListAcountParams struct {
+type ListAccountParams struct {
 	Limit  int32 `json:"limit"`
 	Offset int32 `json:"offset"`
 }
 
-func (q *Queries) ListAcount(ctx context.Context, arg ListAcountParams) ([]Account, error) {
-	rows, err := q.db.QueryContext(ctx, listAcount, arg.Limit, arg.Offset)
+func (q *Queries) ListAccount(ctx context.Context, arg ListAccountParams) ([]Account, error) {
+	rows, err := q.db.QueryContext(ctx, listAccount, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
