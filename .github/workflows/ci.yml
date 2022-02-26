@@ -1,4 +1,4 @@
-name: Go
+name: Test
 
 #触发事件
 on:
@@ -9,8 +9,8 @@ on:
 
 jobs:
 
-  build:
-    name: Build
+  test:
+    name: Test
     runs-on: ubuntu-latest
     steps:
     
