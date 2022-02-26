@@ -12,12 +12,6 @@ type Store struct {
 	db *sql.DB
 }
 
-//SQLStore provides all functions to execute SQL queries and transactions
-// type SQLStore struct {
-// 	db *sql.DB
-// 	*Queries
-// }
-
 //NewStore creates a new store
 func NewStore(db *sql.DB) *Store {
 	return &Store{
@@ -69,19 +63,21 @@ func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (Trans
 	err := store.execTx(ctx, func(q *Queries) error {
 		var err error
 
+		//creates the transfer
 		result.Transfer, err = q.CreateTransfer(ctx, CreateTransferParams{
 			FromAccountID: arg.FromAccountID,
 			ToAccountID:   arg.ToAccountID,
 			Amount:        arg.Amount,
-		}) //creates the transfer
+		})
 		if err != nil {
 			return err
 		}
 
+		//add account entries
 		result.FromEntry, err = q.CreateEntry(ctx, CreateEntryParams{
 			AccountID: arg.FromAccountID,
 			Amount:    -arg.Amount,
-		}) //add account entries
+		})
 		if err != nil {
 			return err
 		}
@@ -89,7 +85,23 @@ func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (Trans
 		result.ToEntry, err = q.CreateEntry(ctx, CreateEntryParams{
 			AccountID: arg.ToAccountID,
 			Amount:    arg.Amount,
-		}) //add account entries
+		})
+		if err != nil {
+			return err
+		}
+
+		result.FromAccount, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{
+			ID:     arg.FromAccountID,
+			Amount: -arg.Amount,
+		})
+		if err != nil {
+			return err
+		}
+
+		result.ToAccount, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{
+			ID:     arg.ToAccountID,
+			Amount: arg.Amount,
+		})
 		if err != nil {
 			return err
 		}
